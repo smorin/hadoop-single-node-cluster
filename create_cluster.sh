@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 email_contact=$1 # nagios wants the sysadmin's email address
-if [ $email_contact -eq 0 ]
-  then
-    echo "Usage: create_cluster.sh someone@example.com"
-    echo "You must supply a contact email for Nagios monitoring. Exiting."
-    exit 1
+if [[ $email_contact == "" ]]
+    then
+        echo "Usage: create_cluster.sh someone@example.com"
+        echo "You must supply a contact email for Nagios monitoring. Exiting."
+        exit 1
 fi
 
 
@@ -12,16 +12,17 @@ function wait_until_some_http_status () {
     url=$1
     target_status=$2
     s=0
-    while [ $s != $target_status ]; do
-        s=$(curl -o /dev/null -s -w %{http_code} $url)
-        if [ $s == "000" ]
-        then
-            echo "<no response from server>"
-        else
-            echo "HTTP status: $s"
-        fi
-        sleep 2
-    done
+    while [[ $s != $target_status ]]
+        do
+            s=$(curl -o /dev/null -s -w %{http_code} $url)
+            if [[ $s == "000" ]]
+                then
+                    echo "<no response from server>"
+                else
+                    echo "HTTP status: $s"
+            fi
+            sleep 2
+        done
 }
 
 echo "First install and start needed services"
