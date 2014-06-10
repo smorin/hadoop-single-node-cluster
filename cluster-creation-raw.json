@@ -1,0 +1,15 @@
+'{
+  "blueprint" : "bp-all-services",
+  "default_password" : "ambari-default-password",
+  "host_groups" :[
+    {
+      "name" : "host_group_1",
+      "hosts" : [
+        {
+          "fqdn" : "FQDN_GOES_HERE"
+        }
+      ]
+    }
+  ]
+}
+'
