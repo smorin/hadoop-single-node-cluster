@@ -10,5 +10,5 @@ This is a bash script that installs a hadoop 2 cluster with a single command
 ```
 git clone https://github.com/DemandCube/hadoop-single-node-cluster.git
 cd hadoop-single-node-cluster
-make install
+./create_cluster.sh YOUR_EMAIL
 ```
