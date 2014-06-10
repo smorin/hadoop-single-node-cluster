@@ -30,8 +30,20 @@ sudo yum install -y ntp ntpdate ntp-doc  # in many installs, ex. RHEL EC2 AMI, w
 sudo chkconfig ntpd on
 sudo service ntpd restart
 echo "To get ambari with yum we need the Hortonworks repo"
+sudo yum install -y wget
 sudo wget -P /etc/yum.repos.d/ http://public-repo-1.hortonworks.com/ambari/centos6/1.x/updates/1.6.0/ambari.repo
 sudo yum -y install ambari-server ambari-agent
+
+my_fqdn=$(hostname -f)
+if [ !  $? -eq 0 ] ; then
+my_fqdn=$(hostname)
+
+echo "FQDN:$my_fqdn"
+echo "127.0.0.1   localhost localhost.localdomain localhost4 localhost4.localdomain4 $my_fqdn" > /etc/hosts
+echo "::1         localhost localhost.localdomain localhost6 localhost6.localdomain6" >> /etc/hosts
+fi
+echo "FQDN:$my_fqdn"
+
 
 sudo ambari-agent restart
 sudo ambari-server setup -v -s
@@ -51,7 +63,8 @@ echo "Trying http://localhost:8080/api/v1/clusters to confirm Ambari server is s
 wait_until_some_http_status "http://admin:admin@localhost:8080/api/v1/clusters" "200"
 
 echo "Replace the dummy hostname in the cluster creation JSON file with this host's fully qualified domain name"
-my_fqdn=$(hostname -f)
+# now set above
+# my_fqdn=$(hostname -f)
 sed s/FQDN_GOES_HERE/$my_fqdn/ cluster-creation-raw.json > cluster-creation.json
 
 echo ""
