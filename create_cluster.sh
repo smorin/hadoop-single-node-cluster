@@ -1,5 +1,12 @@
 #!/usr/bin/env bash
 email_contact=$1 # nagios wants the sysadmin's email address
+if [ $email_contact -eq 0 ]
+  then
+    echo "Usage: create_cluster.sh someone@example.com"
+    echo "You must supply a contact email for Nagios monitoring. Exiting."
+    exit 1
+fi
+
 
 function wait_until_some_http_status () {
     url=$1
