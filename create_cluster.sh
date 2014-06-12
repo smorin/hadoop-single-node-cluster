@@ -7,6 +7,18 @@ if [[ $email_contact == "" ]]
         exit 1
 fi
 
+function check_http_status(){
+    url=$1
+    target_status=$2
+    actual_status=$(curl -o /dev/null -s -w %{http_code} $url)
+    if [[ $target_status == actual_status ]]; then
+		#echo "Target status matched."
+		echo true
+	else
+		#echo "Target status $target_status not equal to $actual_status"
+		echo false
+	fi     
+}
 
 function wait_until_some_http_status () {
     url=$1
@@ -70,6 +82,12 @@ sed s/FQDN_GOES_HERE/$my_fqdn/ cluster-creation-raw.json > cluster-creation.json
 echo ""
 echo "Pausing for 15 seconds to let Ambari server settle down"
 sleep 15
+
+#if cluster already exists delete it
+if check_http_status  '-H "X-Requested-By: ambari" -u admin:admin -i  http://localhost:8080/api/v1/clusters/cl1' 200; then
+	curl -H "X-Requested-By: ambari" -u admin:admin -i -X DELETE http://localhost:8080/api/v1/clusters/cl1
+fi
+
 echo "Now cause a cluster to be created with our loaded blueprint"
 curl -v -X POST -d @cluster-creation.json http://admin:admin@localhost:8080/api/v1/clusters/cl1 --header "Content-Type:application/json" --header "X-Requested-By:mycompany"
 echo ""
