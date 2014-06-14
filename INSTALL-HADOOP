@@ -2,7 +2,7 @@
 
 
 
-# curl -s https://raw.githubusercontent.com/DemandCube/hadoop-single-node-cluster/master/HADOOP-SINGLE-NODE-CLUSTER | bash -s -- -r
+# curl -sSL https://raw.githubusercontent.com/DemandCube/hadoop-single-node-cluster/master/HADOOP-SINGLE-NODE-CLUSTER | bash -s -- -r
 
 
 
