@@ -20,6 +20,12 @@ else
     fi
 fi
 
+if [ -f /etc/redhat-release ] ; then
+    cat /etc/redhat-release
+else
+    echo "WARNING this is only tested on CENTOS this may not work"
+fi
+
 
 email_contact=$1 # nagios wants the sysadmin's email address
 if [[ $email_contact == "" ]] ; then
@@ -48,20 +54,47 @@ function check_http_status(){
 }
 
 function wait_until_some_http_status () {
-    url=$1
-    target_status=$2
-    s=0
+    local url=$1
+    local target_status=$2
+    local s=0
+    local spinstr='|/-\'
+    local clean_spin=0
+
+
     while [[ $s != $target_status ]]
         do
             s=$(curl -o /dev/null -s -w %{http_code} $url)
             if [[ $s == "000" ]]
                 then
-                    echo "<no response from server>"
+                    if [ $clean_spin -eq 1 ] ; then
+                        printf "\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b"
+                    fi
+                    local temp=${spinstr#?}
+                    printf "no response from server - [%c]  " "$spinstr"
+                    local spinstr=$temp${spinstr%"$temp"}
+                    clean_spin=1
+                    #echo "<no response from server>"
                 else
                     echo "HTTP status: $s"
             fi
             sleep 2
+
         done
+}
+
+spinner()
+{
+    local thetime=$1
+    local delay=0.75
+    local spinstr='|/-\'
+    for (( c=0 ; c<=$thetime ; c++ )) {
+        local temp=${spinstr#?}
+        printf " [%c]  " "$spinstr"
+        local spinstr=$temp${spinstr%"$temp"}
+        sleep $delay
+        printf "\b\b\b\b\b\b"
+    }
+    printf "    \b\b\b\b"
 }
 
 echo "First install and start needed services"
@@ -74,6 +107,13 @@ sudo wget -c -P /etc/yum.repos.d/ http://public-repo-1.hortonworks.com/ambari/ce
 sudo yum -y install ambari-server ambari-agent
 
 my_fqdn=$(hostname -f)
+
+# Internally Ambari uses the following to get it's hostname
+# >>> import socket
+# >>> socket.getfqdn()
+# 'localhost.localdomain'
+
+
 if [ !  $? -eq 0 ] ; then
 my_fqdn=$(hostname)
 
@@ -107,11 +147,12 @@ echo "Replace the dummy hostname in the cluster creation JSON file with this hos
 sed s/FQDN_GOES_HERE/$my_fqdn/ cluster-creation-raw.json > cluster-creation.json
 
 echo ""
-echo "Pausing for 15 seconds to let Ambari server settle down"
-sleep 15
+echo "Pausing for 30 seconds to let Ambari server settle down"
+spinner(40)
 
 #if cluster already exists delete it
 if check_http_status  '-H "X-Requested-By: ambari" -u admin:admin -i  http://localhost:8080/api/v1/clusters/cl1' 200; then
+    echo "Cluster [cl1] already exists - deleting it"
 	curl -H "X-Requested-By: ambari" -u admin:admin -i -X DELETE http://localhost:8080/api/v1/clusters/cl1
 fi
 
