@@ -108,14 +108,17 @@ function wait_until_some_http_status () {
             s=$(curl -o /dev/null -s -w %{http_code} $url)
             if [[ $s == "000" ]]
                 then
-                    if [ $clean_spin -eq 1 ] ; then
-                        printf "\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b"
+                    if [ ${REMOTE:-false} == "false" ] ; then  
+                        if [ $clean_spin -eq 1 ] ; then
+                            printf "\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b"
+                        fi
+                        local temp=${spinstr#?}
+                        printf "no response from server - [%c]  " "$spinstr"
+                        local spinstr=$temp${spinstr%"$temp"}
+                        clean_spin=1
+                    else 
+                        echo "<no response from server>"
                     fi
-                    local temp=${spinstr#?}
-                    printf "no response from server - [%c]  " "$spinstr"
-                    local spinstr=$temp${spinstr%"$temp"}
-                    clean_spin=1
-                    #echo "<no response from server>"
                 else
                     echo "HTTP status: $s"
             fi
@@ -223,7 +226,13 @@ fi
 
 echo ""
 echo "Pausing for 30 seconds to let Ambari server settle down"
-spinner 40
+
+if [ "$REMOTE" == "true" ] ; then
+    sleep 30
+else
+    spinner 40
+fi
+
 
 #if cluster already exists delete it
 if check_http_status  '-H "X-Requested-By: ambari" -u admin:admin -i  http://localhost:8080/api/v1/clusters/cl1' 200; then
