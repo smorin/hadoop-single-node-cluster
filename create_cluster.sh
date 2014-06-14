@@ -1,9 +1,44 @@
 #!/usr/bin/env bash
 
-cat HADOOP-SINGLE-NODE-CLUSTER
+
+
+# curl -s https://raw.githubusercontent.com/DemandCube/hadoop-single-node-cluster/master/HADOOP-SINGLE-NODE-CLUSTER | bash -s -- -r
+
+
+
+FORCE=false
+DEBUG=false
+REMOTE=false
+while getopts ":e:fdr" Option
+# Initial declaration.
+# a, b, c, d, e, f, and g are the flags expected.
+# The : after flag 'e' shows it will have an option passed with it.
+do
+  case $Option in
+#	w ) CMD=$OPTARG; FILENAME="PIMSLogList.txt"; TARGET="logfiles"; ;;
+    e ) email_contact=$OPTARG ;;
+	f ) FORCE=true ;;
+	d ) DEBUG=true ;;
+    r ) REMOTE=true ;;
+	* ) echo "Not recognized argument"; exit -1  ;;
+  esac
+done
+shift $(($OPTIND - 1))
+
+
+if [ -f HADOOP-SINGLE-NODE-CLUSTER ] ; then
+    cat HADOOP-SINGLE-NODE-CLUSTER
+else
+    if [ "$REMOTE" == "true" ] ; then
+        curl -s https://raw.githubusercontent.com/DemandCube/hadoop-single-node-cluster/master/HADOOP-SINGLE-NODE-CLUSTER
+        echo ""
+    fi
+fi
 printf "\n\n"
 
 sleep 1
+
+exit 1
 
 # Check memory and if it's low warn the user
 ram=$(free -l | head -n 2 | tail -n 1 | awk '{print $2}')
@@ -18,7 +53,10 @@ else
         echo ""
         echo "RECOMMENDED: Minimum of 4 Gigs of RAM or will probably fail"
         echo ""
-        exit 1;
+        if [ "$FORCE" != "false" ] ; then
+            echo "Use: argument -f to force"
+            exit 1;
+        fi
     fi
 fi
 
@@ -31,7 +69,7 @@ else
 fi
 
 
-email_contact=$1 # nagios wants the sysadmin's email address
+# email_contact=$1 # nagios wants the sysadmin's email address
 if [[ $email_contact == "" ]] ; then
     echo "Usage: create_cluster.sh [someone@example.com]"
     echo "Optionally supply a contact email for Nagios monitoring. Exiting."
@@ -106,8 +144,12 @@ sudo yum install -y ntp ntpdate ntp-doc  # in many installs, ex. RHEL EC2 AMI, w
 sudo chkconfig ntpd on
 sudo service ntpd restart
 echo "To get ambari with yum we need the Hortonworks repo"
-sudo yum install -y wget
-sudo wget -c -P /etc/yum.repos.d/ http://public-repo-1.hortonworks.com/ambari/centos6/1.x/updates/1.6.0/ambari.repo
+
+# Old code using wget - replaced with the curl equivalent
+# sudo yum install -y wget
+# sudo wget -c -P /etc/yum.repos.d/ http://public-repo-1.hortonworks.com/ambari/centos6/1.x/updates/1.6.0/ambari.repo
+
+curl --create-dirs -C - -o /etc/yum.repos.d/ambari.repo http://public-repo-1.hortonworks.com/ambari/centos6/1.x/updates/1.6.0/ambari.repo
 sudo yum -y install ambari-server ambari-agent
 
 # hostname -f
@@ -148,15 +190,23 @@ sudo ambari-agent restart
 sudo ambari-server setup -v -s
 sudo ambari-server restart
 
+TMP_DIR=/tmp
+
 echo "Replace the dummy email address in the blueprint JSON file with the specified email address"
-sed s/NAGIOS_CONTACT_GOES_HERE/$email_contact/ blueprint-raw.json > blueprint.json
+
+if [ "$REMOTE" == "true" ] ; then
+    curl -s https://raw.githubusercontent.com/DemandCube/hadoop-single-node-cluster/master/blueprint-raw.json | sed s/NAGIOS_CONTACT_GOES_HERE/$email_contact/ > $TMP_DIR/blueprint.json
+else
+    sed s/NAGIOS_CONTACT_GOES_HERE/$email_contact/ blueprint-raw.json > $TMP_DIR/blueprint.json    
+fi
+
 
 echo "Trying http://localhost:8080/api/v1/blueprints to confirm Ambari server is up..."
 wait_until_some_http_status "http://admin:admin@localhost:8080/api/v1/blueprints" "200"
 sleep 2 # wait a few moments longer just to let the server settle down
 
 echo "Add the blueprint.json blueprint file to our Ambari server's available blueprints"
-curl -v -X POST -d @blueprint.json http://admin:admin@localhost:8080/api/v1/blueprints/bp-all-services --header "Content-Type:application/json" --header "X-Requested-By:mycompany"
+curl -v -X POST -d @$TMP_DIR/blueprint.json http://admin:admin@localhost:8080/api/v1/blueprints/bp-all-services --header "Content-Type:application/json" --header "X-Requested-By:mycompany"
 
 echo "Trying http://localhost:8080/api/v1/clusters to confirm Ambari server is still up..."
 wait_until_some_http_status "http://admin:admin@localhost:8080/api/v1/clusters" "200"
@@ -164,7 +214,12 @@ wait_until_some_http_status "http://admin:admin@localhost:8080/api/v1/clusters" 
 echo "Replace the dummy hostname in the cluster creation JSON file with this host's fully qualified domain name"
 # now set above
 # my_fqdn=$(hostname -f)
-sed s/FQDN_GOES_HERE/$my_fqdn/ cluster-creation-raw.json > cluster-creation.json
+
+if [ "$REMOTE" == "true" ] ; then
+    curl -s https://raw.githubusercontent.com/DemandCube/hadoop-single-node-cluster/master/cluster-creation-raw.json | sed s/FQDN_GOES_HERE/$my_fqdn/ > $TMP_DIR/cluster-creation.json
+else
+    sed s/FQDN_GOES_HERE/$my_fqdn/ cluster-creation-raw.json > $TMP_DIR/cluster-creation.json
+fi
 
 echo ""
 echo "Pausing for 30 seconds to let Ambari server settle down"
@@ -177,11 +232,11 @@ if check_http_status  '-H "X-Requested-By: ambari" -u admin:admin -i  http://loc
 fi
 
 echo "Now cause a cluster to be created with our loaded blueprint"
-curl -v -X POST -d @cluster-creation.json http://admin:admin@localhost:8080/api/v1/clusters/cl1 --header "Content-Type:application/json" --header "X-Requested-By:mycompany"
+curl -v -X POST -d @$TMP_DIR/cluster-creation.json http://admin:admin@localhost:8080/api/v1/clusters/cl1 --header "Content-Type:application/json" --header "X-Requested-By:mycompany"
 echo ""
 echo "Single node Ambari setup finished. Point browser to localhost:8080 and log in as admin:admin to use Ambari."
 
 # This gets COMPLETED when done
 # curl -s -uadmin:admin http://localhost:8080/api/v1/clusters/cl1/requests/1?fields=Requests/request_status | grep request_status | awk '{print $3}' | tr -d [\"]
 
-echo 'echo "$1"' | bash -s -- -asdf
+
