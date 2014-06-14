@@ -12,7 +12,7 @@ This will install a single node hadoop cluster on a machine with single command
 
 # One liner 
 ```
-curl -sSL https://raw.githubusercontent.com/DemandCube/hadoop-single-node-cluster/master/HADOOP-SINGLE-NODE-CLUSTER | bash -s -- -r
+  curl -sSL https://raw.githubusercontent.com/DemandCube/hadoop-single-node-cluster/master/INSTALL-HADOOP | bash -s -- -r
 ```
 
 # Compatibility
