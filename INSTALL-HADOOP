@@ -51,7 +51,7 @@ else
         echo ""
         echo "RECOMMENDED: Minimum of 4 Gigs of RAM or will probably fail"
         echo ""
-        if [ "$FORCE" != "false" ] ; then
+        if [ "$FORCE" == "false" ] ; then
             echo "Use: argument -f to force"
             exit 1;
         fi
