@@ -110,22 +110,38 @@ sudo yum install -y wget
 sudo wget -c -P /etc/yum.repos.d/ http://public-repo-1.hortonworks.com/ambari/centos6/1.x/updates/1.6.0/ambari.repo
 sudo yum -y install ambari-server ambari-agent
 
-my_fqdn=$(hostname -f)
+# hostname -f
+# hostname
+# uname -n
+# /etc/sysconfig/network
+# /etc/hosts
+# /etc/hostname
+
+my_fqdn=$(python -c 'from socket import getfqdn; print getfqdn()')
 
 # Internally Ambari uses the following to get it's hostname
 # >>> import socket
 # >>> socket.getfqdn()
 # 'localhost.localdomain'
 
+ping -c 1 $my_fqdn
 
 if [ !  $? -eq 0 ] ; then
 my_fqdn=$(hostname)
 
+# get the main ip address
+# this gets the ip address that would be used to route to ip 8.8.8.8
+my_ip=`ip route get 8.8.8.8 | awk 'NR==1 {print $NF}'`
+my_short_fqdn=$my_fqdn
+my_long_fqdn="${my_short_fqdn}.sandbox.neverwinterdp.com"
+
 echo "FQDN:$my_fqdn"
 echo "127.0.0.1   localhost localhost.localdomain localhost4 localhost4.localdomain4 $my_fqdn" > /etc/hosts
 echo "::1         localhost localhost.localdomain localhost6 localhost6.localdomain6" >> /etc/hosts
+echo "$my_ip      ${my_long_fqdn} $my_fqdn" >> /etc/hosts
+my_fqdn=$my_long_fqdn
 fi
-echo "FQDN:$my_fqdn"
+echo "FQDN:$my_lofqdn"
 
 
 sudo ambari-agent restart
