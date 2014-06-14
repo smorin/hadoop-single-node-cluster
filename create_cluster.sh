@@ -1,11 +1,34 @@
 #!/usr/bin/env bash
+
+cat HADOOP-SINGLE-NODE-CLUSTER
+sleep 1 
+
+# Check memory and if it's low warn the user
+ram=$(free -l | head -n 2 | tail -n 1 | awk '{print $2}')
+if [ "$ram" == "" ] ; then
+    echo "WARNING: Problem checking how much ram you have."
+else
+    # test if machine has 4 gigs
+    if [ $ram -lt 4194304] ; then
+        echo "WARNING NOT ENOUGH MEMORY"
+        echo "RAM=$ram kilobytes"
+        echo "NOTE: 1 gig of ram is 1048576 kilobytes"
+    fi
+fi
+
+
 email_contact=$1 # nagios wants the sysadmin's email address
-if [[ $email_contact == "" ]]
-    then
+if [[ $email_contact == "" ]] ; then
         echo "Usage: create_cluster.sh someone@example.com"
         echo "You must supply a contact email for Nagios monitoring. Exiting."
-        exit 1
+        
+else
+    email_contact='nobody@noop.com'
+    echo "using default email for nagios: ${email_contact}"
+    echo "Add argument to custom install email"
 fi
+
+
 
 function check_http_status(){
     url=$1
