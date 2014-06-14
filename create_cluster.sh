@@ -1,7 +1,9 @@
 #!/usr/bin/env bash
 
 cat HADOOP-SINGLE-NODE-CLUSTER
-sleep 1 
+printf "\n\n"
+
+sleep 1
 
 # Check memory and if it's low warn the user
 ram=$(free -l | head -n 2 | tail -n 1 | awk '{print $2}')
@@ -9,7 +11,7 @@ if [ "$ram" == "" ] ; then
     echo "WARNING: Problem checking how much ram you have."
 else
     # test if machine has 4 gigs
-    if [ $ram -lt 4194304] ; then
+    if [ $ram -lt 4194304 ] ; then
         echo "WARNING NOT ENOUGH MEMORY"
         echo "RAM=$ram kilobytes"
         echo "NOTE: 1 gig of ram is 1048576 kilobytes"
@@ -21,20 +23,21 @@ else
 fi
 
 if [ -f /etc/redhat-release ] ; then
+    echo "Using OS:"
     cat /etc/redhat-release
 else
     echo "WARNING this is only tested on CENTOS this may not work"
+    printf "\n\n"
 fi
 
 
 email_contact=$1 # nagios wants the sysadmin's email address
 if [[ $email_contact == "" ]] ; then
-        echo "Usage: create_cluster.sh someone@example.com"
-        echo "You must supply a contact email for Nagios monitoring. Exiting."
-        
-else
+    echo "Usage: create_cluster.sh [someone@example.com]"
+    echo "Optionally supply a contact email for Nagios monitoring. Exiting."
+
     email_contact='nobody@noop.com'
-    echo "using default email for nagios: ${email_contact}"
+    echo "Using default email for nagios: ${email_contact}"
     echo "Add argument to custom install email"
 fi
 
@@ -45,13 +48,14 @@ function check_http_status(){
     target_status=$2
     actual_status=$(curl -o /dev/null -s -w %{http_code} $url)
     if [[ $target_status == actual_status ]]; then
-		#echo "Target status matched."
-		echo true
-	else
-		#echo "Target status $target_status not equal to $actual_status"
-		echo false
-	fi     
+                #echo "Target status matched."
+                echo true
+        else
+                #echo "Target status $target_status not equal to $actual_status"
+                echo false
+        fi
 }
+
 
 function wait_until_some_http_status () {
     local url=$1
@@ -148,7 +152,7 @@ sed s/FQDN_GOES_HERE/$my_fqdn/ cluster-creation-raw.json > cluster-creation.json
 
 echo ""
 echo "Pausing for 30 seconds to let Ambari server settle down"
-spinner(40)
+spinner 40
 
 #if cluster already exists delete it
 if check_http_status  '-H "X-Requested-By: ambari" -u admin:admin -i  http://localhost:8080/api/v1/clusters/cl1' 200; then
