@@ -136,7 +136,7 @@ my_short_fqdn=$my_fqdn
 my_long_fqdn="${my_short_fqdn}.sandbox.neverwinterdp.com"
 
 echo "FQDN:$my_fqdn"
-echo "127.0.0.1   localhost localhost.localdomain localhost4 localhost4.localdomain4 $my_fqdn" > /etc/hosts
+echo "127.0.0.1   localhost localhost.localdomain localhost4 localhost4.localdomain4" > /etc/hosts
 echo "::1         localhost localhost.localdomain localhost6 localhost6.localdomain6" >> /etc/hosts
 echo "$my_ip      ${my_long_fqdn} $my_fqdn" >> /etc/hosts
 my_fqdn=$my_long_fqdn
@@ -180,3 +180,8 @@ echo "Now cause a cluster to be created with our loaded blueprint"
 curl -v -X POST -d @cluster-creation.json http://admin:admin@localhost:8080/api/v1/clusters/cl1 --header "Content-Type:application/json" --header "X-Requested-By:mycompany"
 echo ""
 echo "Single node Ambari setup finished. Point browser to localhost:8080 and log in as admin:admin to use Ambari."
+
+# This gets COMPLETED when done
+# curl -s -uadmin:admin http://localhost:8080/api/v1/clusters/cl1/requests/1?fields=Requests/request_status | grep request_status | awk '{print $3}' | tr -d [\"]
+
+echo 'echo "$1"' | bash -s -- -asdf
