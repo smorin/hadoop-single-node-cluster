@@ -38,8 +38,6 @@ printf "\n\n"
 
 sleep 1
 
-exit 1
-
 # Check memory and if it's low warn the user
 ram=$(free -l | head -n 2 | tail -n 1 | awk '{print $2}')
 if [ "$ram" == "" ] ; then
