@@ -13,6 +13,10 @@ else
         echo "WARNING NOT ENOUGH MEMORY"
         echo "RAM=$ram kilobytes"
         echo "NOTE: 1 gig of ram is 1048576 kilobytes"
+        echo ""
+        echo "RECOMMENDED: Minimum of 4 Gigs of RAM or will probably fail"
+        echo ""
+        exit 1;
     fi
 fi
 
