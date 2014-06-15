@@ -248,7 +248,7 @@ echo "Single node Ambari setup finished. Point browser to localhost:8080 and log
 
 
 CHECK_STATUS=true
-SECONDS=0
+LOOP_SECONDS=0
 
 while [[ "$CHECK_STATUS" == "true" ]] ; do
     
@@ -279,7 +279,7 @@ elif [ "$CLUSTER_STATUS" == "200" ] ; then
     echo "Successful call - current status:"
     echo "$CLUSTER_RESULTS" | grep message | awk '{print $3}' | tr -d [\"]
     
-    if [ "$CLUSTER_RESULTS" == "COMPLETED" -o "$CLUSTER_RESULTS" == "FAILED"] ; then
+    if [ "$CLUSTER_RESULTS" == "COMPLETED" ] || [ "$CLUSTER_RESULTS" == "FAILED" ] ; then
         if [ "$CLUSTER_RESULTS" == "COMPLETED" ] ; then
             echo "Done - Enjoy your cluster - NeverwinterDP Team"
             exit 0
@@ -327,7 +327,7 @@ else
     echo "JSON_RESPONSE_STATUS: ${CLUSTER_RESULTS_STATUS}"
 fi
 
-SECONDS=$SECONDS + 1
+LOOP_SECONDS=LOOP_SECONDS+1
 
 sleep 1
 
