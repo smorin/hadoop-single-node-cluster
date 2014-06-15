@@ -1,7 +1,7 @@
 hadoop-single-node-cluster
 =======================
 
-This will install a single node hadoop cluster on a machine with single command
+This will install a single node hadoop cluster on a machine with single command.  This is intended as use for a dev setup or simple testing.
 
 - This is part of [NeverwinterDP the Data Pipeline for Hadoop](https://github.com/DemandCube/NeverwinterDP)
 
@@ -14,6 +14,7 @@ This will install a single node hadoop cluster on a machine with single command
 ```
   curl -sSL https://raw.githubusercontent.com/DemandCube/hadoop-single-node-cluster/master/INSTALL-HADOOP | bash -s -- -r
 ```
+NOTE: Meant to be run as root
 
 # Compatibility
 
