@@ -262,8 +262,7 @@ while [[ "$CHECK_STATUS" == "true" ]] ; do
     # echo "$CLUSTER_RESULTS_STATUS"
     
     
-if [[ "$CLUSTER_STATUS" == "000" ]]
-    then
+if [[ "$CLUSTER_STATUS" == "000" ]] ; then
         if [ ${REMOTE:-false} == "false" ] ; then  
             if [ $clean_spin -eq 1 ] ; then
                 printf "\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b"
@@ -275,8 +274,6 @@ if [[ "$CLUSTER_STATUS" == "000" ]]
         else 
             echo "<no response from server, continue to poll>"
         fi
-    else
-        echo "HTTP status: $s"
 elif [ "$CLUSTER_STATUS" == "200" ] ; then
     # Success and test for CLUSTER_RESULTS_STATUS (IN_PROGRESS,FAILED,COMPLETED)
     echo "Successful call - current status:"
