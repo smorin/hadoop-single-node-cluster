@@ -247,3 +247,130 @@ echo "Single node Ambari setup finished. Point browser to localhost:8080 and log
 # curl -s -uadmin:admin http://localhost:8080/api/v1/clusters/cl1/requests/1?fields=Requests/request_status | grep request_status | awk '{print $3}' | tr -d [\"]
 
 
+CHECK_STATUS=true
+SECONDS=0
+
+while [[ "$CHECK_STATUS" == "true" ]] ; do
+    
+    CMD_CLUSTER_STATUS='curl -uadmin:admin -o /dev/null -s -w %{http_code} http://localhost:8080/api/v1/clusters/cl1/requests/1?fields=Requests/request_status'
+    CMD_CLUSTER_RESULTS='curl -s -uadmin:admin http://localhost:8080/api/v1/clusters/cl1/requests/1?fields=Requests/request_status'
+    
+    CLUSTER_STATUS=`$CMD_CLUSTER_STATUS`
+    CLUSTER_RESULTS=`$CMD_CLUSTER_RESULTS`
+    CLUSTER_RESULTS_STATUS=`echo "$CLUSTER_RESULTS" | grep request_status | awk '{print $3}' | tr -d [\"]`
+    # echo "$CLUSTER_STATUS"
+    # echo "$CLUSTER_RESULTS_STATUS"
+    
+    
+if [[ "$CLUSTER_STATUS" == "000" ]]
+    then
+        if [ ${REMOTE:-false} == "false" ] ; then  
+            if [ $clean_spin -eq 1 ] ; then
+                printf "\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b"
+            fi
+            local temp=${spinstr#?}
+            printf "no response from server - [%c]  " "$spinstr"
+            local spinstr=$temp${spinstr%"$temp"}
+            clean_spin=1
+        else 
+            echo "<no response from server, continue to poll>"
+        fi
+    else
+        echo "HTTP status: $s"
+elif [ "$CLUSTER_STATUS" == "200" ] ; then
+    # Success and test for CLUSTER_RESULTS_STATUS (IN_PROGRESS,FAILED,COMPLETED)
+    echo "Successful call - current status:"
+    echo "$CLUSTER_RESULTS" | grep message | awk '{print $3}' | tr -d [\"]
+    
+    if [ "$CLUSTER_RESULTS" == "COMPLETED" -o "$CLUSTER_RESULTS" == "FAILED"] ; then
+        if [ "$CLUSTER_RESULTS" == "COMPLETED" ] ; then
+            echo "Done - Enjoy your cluster - NeverwinterDP Team"
+            exit 0
+        fi
+        if [ "$CLUSTER_RESULTS" == "FAILED" ] ; then
+            echo "It failed you'll need to investigate"
+            exit 1
+        fi
+    fi
+    
+elif [ "$CLUSTER_STATUS" == "403" ] ; then
+    # Check error message
+    MSG="\nGot a 403 response so is probably a authentication problem.\n\n"
+    printf "$MSG"
+    echo "$CLUSTER_RESULTS" | grep message | awk '{print $3}' | tr -d [\"]
+    exit 1
+elif [ "$CLUSTER_STATUS" == "404" ] ; then
+    MSG="\nGot a 404 response so is probably a bad query call.\n\n"
+    printf "$MSG"
+    echo "$CLUSTER_RESULTS" | grep message | awk '{print $3}' | tr -d [\"]
+    exit 1
+elif [ "${CLUSTER_STATUS:0:1}" == "2" ] ; then
+    MSG="\nGot a 2XX response so should be good.\n\n"
+    printf "$MSG"
+    
+    echo "$CLUSTER_RESULTS"
+    
+    printf "$MSG"
+    echo "Ending Loop"
+    exit 1
+    
+elif [ "${CLUSTER_STATUS:0:1}" == "4" ] ; then
+    MSG="\nGot a 4XX response so there is probably a problem.\n\n"
+    printf "$MSG"
+    
+    echo "$CLUSTER_RESULTS"
+    
+    printf "$MSG"
+    exit 1
+else
+    MSG="\nGot a unknown response so there is probably a problem.\n\n"
+    printf "$MSG"
+    echo "CLUSTER_RESULTS: ${CLUSTER_RESULTS}"
+    echo "HTTP_STATUS: ${CLUSTER_STATUS}"
+    echo "JSON_RESPONSE_STATUS: ${CLUSTER_RESULTS_STATUS}"
+fi
+
+SECONDS=$SECONDS + 1
+
+sleep 1
+
+done
+
+
+#  echo "$CLUSTER_RESULTS"
+# {
+#   "status" : 404,
+#   "message" : "Request resource doesn't exist."
+# }
+
+# curl: (6) Couldn't resolve host '%http_code'
+# {
+#   "status": 403,
+#   "message": "Full authentication is required to access this resource"
+# }
+
+# [root@test2 ~]# curl -s -uadmin:admin http://localhost:8080/api/v1/clusters/cl1/requests/1?fields=Requests/request_status
+# {
+#   "href" : "http://localhost:8080/api/v1/clusters/cl1/requests/1",
+#   "Requests" : {
+#     "cluster_name" : "cl1",
+#     "id" : 1,
+#     "request_status" : "IN_PROGRESS"
+#   }
+# }
+
+# [root@ip-10-233-133-34 ~]# curl -s -uadmin:admin http://localhost:8080/api/v1/clusters/cl1/requests/1?fields=Requests/request_status
+# {
+#   "status" : 404,
+#   "message" : "Request resource doesn't exist."
+# }
+
+# [vagrant@sparkngin1 ~]$ curl -s -uadmin:admin http://localhost:8080/api/v1/clusters/cl1/requests/1?fields=Requests/request_status
+# {
+#   "href" : "http://localhost:8080/api/v1/clusters/cl1/requests/1",
+#   "Requests" : {
+#     "cluster_name" : "cl1",
+#     "id" : 1,
+#     "request_status" : "FAILED"
+#   }
+# }
