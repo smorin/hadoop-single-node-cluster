@@ -264,8 +264,8 @@ while [[ "$CHECK_STATUS" == "true" ]] ; do
     
     CLUSTER_RESULTS_SECTION=`$CMD_CLUSTER_RESULTS_SECTION`
     
-    CLUSTER_RESULTS_COMPLETED=`echo "CLUSTER_RESULTS_SECTION" | grep completed_task_count | awk '{print $3}' | tr -d [\"]`
-    CLUSTER_RESULTS_TASKS=`echo "CLUSTER_RESULTS_SECTION" | grep task_count | awk '{print $3}' | tr -d [\"]`
+    CLUSTER_RESULTS_COMPLETED=`echo "$CLUSTER_RESULTS_SECTION" | grep completed_task_count | awk '{print $3}' | tr -d [\",]`
+    CLUSTER_RESULTS_TASKS=`echo "$CLUSTER_RESULTS_SECTION" | grep \"task_count | awk '{print $3}' | tr -d [\",]`
     # echo "$CLUSTER_STATUS"
     # echo "$CLUSTER_RESULTS_STATUS"
     
@@ -373,6 +373,30 @@ sleep 1
 
 done
 
+
+# {
+#   "href" : "http://localhost:8080/api/v1/clusters/cl1/requests/1",
+#   "Requests" : {
+#     "aborted_task_count" : 0,
+#     "cluster_name" : "cl1",
+#     "completed_task_count" : 0,
+#     "create_time" : 1402883226676,
+#     "end_time" : -1,
+#     "failed_task_count" : 0,
+#     "id" : 1,
+#     "inputs" : null,
+#     "progress_percent" : 4.757575757575758,
+#     "queued_task_count" : 31,
+#     "request_context" : "Install and start all services",
+#     "request_schedule" : null,
+#     "request_status" : "IN_PROGRESS",
+#     "resource_filters" : [ ],
+#     "start_time" : 1402883226951,
+#     "task_count" : 66,
+#     "timed_out_task_count" : 0,
+#     "type" : "INTERNAL_REQUEST"
+#   }
+# }
 
 #  echo "$CLUSTER_RESULTS"
 # {
