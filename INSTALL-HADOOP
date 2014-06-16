@@ -100,14 +100,16 @@ fi
 function check_http_status(){
     url=$1
     target_status=$2
+    local retstatus=0
     actual_status=$(curl -o /dev/null -s -w %{http_code} $url)
     if [[ $target_status == actual_status ]]; then
-                #echo "Target status matched."
-                echo true
-        else
-                #echo "Target status $target_status not equal to $actual_status"
-                echo false
-        fi
+            #echo "Target status matched."
+            retstatus=0
+    else
+            #echo "Target status $target_status not equal to $actual_status"
+            retstatus=1
+    fi
+    return $retstatus
 }
 
 function check_ambari() {
@@ -288,9 +290,19 @@ fi
 
 
 #if cluster already exists delete it
-if check_http_status  '-H "X-Requested-By: ambari" -u admin:admin -i  http://localhost:8080/api/v1/clusters/cl1' 200; then
+
+# Code by Anthony doesn't work
+# if check_http_status  '-H "X-Requested-By: ambari" -u admin:admin -i  http://localhost:8080/api/v1/clusters/cl1' 200; then
+#     echo "Cluster [cl1] already exists - deleting it"
+#     curl -H "X-Requested-By: ambari" -u admin:admin -i -X DELETE http://localhost:8080/api/v1/clusters/cl1
+# fi
+
+check_http_status  '-H "X-Requested-By: ambari" -u admin:admin -i  http://localhost:8080/api/v1/clusters/cl1' 200
+
+if [ $? -eq 0 ] ; then
+    # curl -o /dev/null -s -w %{http_code} 
     echo "Cluster [cl1] already exists - deleting it"
-	curl -H "X-Requested-By: ambari" -u admin:admin -i -X DELETE http://localhost:8080/api/v1/clusters/cl1
+    curl -H "X-Requested-By: ambari" -u admin:admin -i -X DELETE http://localhost:8080/api/v1/clusters/cl1
 fi
 
 echo "Now cause a cluster to be created with our loaded blueprint"
@@ -376,7 +388,7 @@ elif [ "$CLUSTER_STATUS" == "200" ] ; then
     
     if [ "$CLUSTER_RESULTS_STATUS" == "COMPLETED" ] || [ "$CLUSTER_RESULTS_STATUS" == "FAILED" ] ; then
         if [ "$CLUSTER_RESULTS_STATUS" == "COMPLETED" ] ; then
-            echo "Done - Enjoy your cluster - NeverwinterDP Team"
+            echo "Done - Enjoy your cluster - NeverwinterDP Team - http://www.neverwinterdp.com"
             exit 0
         fi
         if [ "$CLUSTER_RESULTS_STATUS" == "FAILED" ] ; then
