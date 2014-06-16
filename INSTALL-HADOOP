@@ -250,6 +250,8 @@ echo "Single node Ambari setup finished. Point browser to localhost:8080 and log
 CHECK_STATUS=true
 LOOP_SECONDS=0
 
+AMBARI_RESTARTS=0
+
 while [[ "$CHECK_STATUS" == "true" ]] ; do
     
     CMD_CLUSTER_STATUS='curl -uadmin:admin -o /dev/null -s -w %{http_code} http://localhost:8080/api/v1/clusters/cl1/requests/1?fields=Requests/request_status'
@@ -260,6 +262,37 @@ while [[ "$CHECK_STATUS" == "true" ]] ; do
     CLUSTER_RESULTS_STATUS=`echo "$CLUSTER_RESULTS" | grep request_status | awk '{print $3}' | tr -d [\"]`
     # echo "$CLUSTER_STATUS"
     # echo "$CLUSTER_RESULTS_STATUS"
+    
+    # Test if ambari server dies
+    # /var/run/ambari-server/ambari-server.pid
+
+    ps -p `cat /var/run/ambari-server/ambari-server.pid`
+    
+    if [ $? -ne 0 ] ; then
+        echo "Problem finding ambari running with pid file."
+        if [ -f /var/run/ambari-server/ambari-server.pid ] ; then
+            echo "Pid file is missing."
+        else
+            echo "found pid file but process is missing"
+        fi
+        # Count 1 is not found
+        # Count 2 is the search and process found
+        PROCESS_CHECK=$(ps aux | grep org.apache.ambari.server.controller.AmbariServer | wc -l)
+        if [ $PROCESS_CHECK -lt 2 ] ; then
+            echo "Ambari's not running restarting"
+            sleep 10
+            /etc/init.d/ambari-server start
+            AMBARI_RESTARTS=$AMBARI_RESTARTS+1
+            if [ $AMBARI_RESTARTS -ge 2 ] ; then
+                echo "restarted ambari too many time check manually"
+                exit 1
+            fi
+        fi
+    fi
+    
+    
+    # if pid missing or check with checking for process
+    # /usr/jdk64/jdk1.7.0_45/bin/java -server -XX:NewRatio=3 -XX:+UseConcMarkSweepGC -XX:-UseGCOverheadLimit -XX:CMSInitiatingOccupancyFraction=60 -Xms512m -Xmx2048m -Djava.security.auth.login.config=/etc/ambari-server/conf/krb5JAASLogin.conf -Djava.security.krb5.conf=/etc/krb5.conf -Djavax.security.auth.useSubjectCredsOnly=false -cp /etc/ambari-server/conf:/usr/lib/ambari-server/*:/usr/lib64/qt-3.3/bin:/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin:/root/bin:/usr/lib/ambari-server/*:/usr/share/java/mysql-connector-java.jar:/usr/share/java/mysql-connector-java-5.1.17.jar org.apache.ambari.server.controller.AmbariServer
     
     
 if [[ "$CLUSTER_STATUS" == "000" ]] ; then
@@ -276,8 +309,7 @@ if [[ "$CLUSTER_STATUS" == "000" ]] ; then
         fi
 elif [ "$CLUSTER_STATUS" == "200" ] ; then
     # Success and test for CLUSTER_RESULTS_STATUS (IN_PROGRESS,FAILED,COMPLETED)
-    echo "Successful call - current status:"
-    echo "$CLUSTER_RESULTS" | grep message | awk '{print $3}' | tr -d [\"]
+    echo "Successful call (seconds: $LOOP_SECONDS) - current status:$CLUSTER_RESULTS_STATUS"
     
     if [ "$CLUSTER_RESULTS" == "COMPLETED" ] || [ "$CLUSTER_RESULTS" == "FAILED" ] ; then
         if [ "$CLUSTER_RESULTS" == "COMPLETED" ] ; then
