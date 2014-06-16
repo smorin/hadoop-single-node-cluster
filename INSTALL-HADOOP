@@ -207,6 +207,19 @@ sudo /etc/init.d/iptables stop
 sudo chkconfig ip6tables off
 sudo /etc/init.d/ip6tables stop
 
+sudo yum update openssl.x86_64
+
+echo "The version of openssl.x86_64:"
+yum list  installed openssl.x86_64 | tail -n 1 | awk '{print $2}'
+
+echo "openssl:"
+echo "Good Version: 1.0.1e-16.el6_5.14 - (Known to work)"
+echo "Bad Version: 1.0.1e-15.el6 - (Known to cause ambari agents to not register)"
+
+
+# ---> Package openssl.x86_64 0:1.0.1e-15.el6 will be updated
+# ---> Package openssl.x86_64 0:1.0.1e-16.el6_5.14 will be an update
+
 echo "To get ambari with yum we need the Hortonworks repo"
 
 # Old code using wget - replaced with the curl equivalent
@@ -224,7 +237,7 @@ sudo yum -y install ambari-server ambari-agent
 # /etc/hostname
 
 my_fqdn=$(python -c 'from socket import getfqdn; print getfqdn()')
-
+echo "FQDN:$my_fqdn"
 # Internally Ambari uses the following to get it's hostname
 # >>> import socket
 # >>> socket.getfqdn()
@@ -247,7 +260,7 @@ echo "::1         localhost localhost.localdomain localhost6 localhost6.localdom
 echo "$my_ip      ${my_long_fqdn} $my_fqdn" >> /etc/hosts
 my_fqdn=$my_long_fqdn
 fi
-echo "FQDN:$my_lofqdn"
+echo "FQDN:$my_fqdn"
 
 
 sudo ambari-agent restart
@@ -310,6 +323,28 @@ if [ $? -eq 0 ] ; then
     echo "Cluster [cl1] already exists - deleting it"
     curl -H "X-Requested-By: ambari" -u admin:admin -i -X DELETE http://localhost:8080/api/v1/clusters/cl1
 fi
+
+echo ""
+echo "Printing to see if the blueprint exists"
+echo ""
+
+curl http://admin:admin@localhost:8080/api/v1/blueprints/bp-all-services
+
+echo ""
+echo "Printing to see what register agent hosts exist"
+echo ""
+
+curl -uadmin:admin http://localhost:8080/api/v1/hosts
+
+
+TEST_HOST=`curl -s -uadmin:admin http://localhost:8080/api/v1/hosts | grep $my_fqdn | grep host_name | awk '{print $3}' | tr -d [\"] | wc -l`
+
+if [ $TEST_HOST -ne 1 ] ; then
+    echo "WARNING: Ambari agent host isn't registered please investigate"
+    echo "In the pass have found it to be an ssl error"
+    echo "curl -uadmin:admin http://localhost:8080/api/v1/hosts"
+fi
+
 
 echo "Now cause a cluster to be created with our loaded blueprint"
 curl -v -X POST -d @$TMP_DIR/cluster-creation.json http://admin:admin@localhost:8080/api/v1/clusters/cl1 --header "Content-Type:application/json" --header "X-Requested-By:mycompany"
@@ -507,4 +542,52 @@ done
 #     "id" : 1,
 #     "request_status" : "FAILED"
 #   }
+# }
+
+
+
+
+
+
+
+# [root@ip-10-36-3-46 ~]# curl -v -X POST -d @$TMP_DIR/cluster-creation.json http://admin:admin@localhost:8080/api/v1/clusters/cl1 --header "Content-Type:application/json" --header "X-Requested-By:mycompany"
+# * About to connect() to localhost port 8080 (#0)
+# *   Trying 127.0.0.1... connected
+# * Connected to localhost (127.0.0.1) port 8080 (#0)
+# * Server auth using Basic with user 'admin'
+# > POST /api/v1/clusters/cl1 HTTP/1.1
+# > Authorization: Basic YWRtaW46YWRtaW4=
+# > User-Agent: curl/7.19.7 (x86_64-redhat-linux-gnu) libcurl/7.19.7 NSS/3.14.0.0 zlib/1.2.3 libidn/1.18 libssh2/1.4.2
+# > Host: localhost:8080
+# > Accept: */*
+# > Content-Type:application/json
+# > X-Requested-By:mycompany
+# > Content-Length: 251
+# > 
+# < HTTP/1.1 400 Bad Request
+# < Set-Cookie: AMBARISESSIONID=1loev1y9bqi551lcirxdyqs21q;Path=/
+# < Expires: Thu, 01 Jan 1970 00:00:00 GMT
+# < Content-Type: text/plain
+# < Content-Length: 178
+# < Server: Jetty(7.6.7.v20120910)
+# < 
+# {
+#   "status" : 400,
+#   "message" : "Attempted to add unknown hosts to a cluster.  These hosts have not been registered with the server: ip-10-36-3-46.us-west-2.compute.internal"
+# * Connection #0 to host localhost left intact
+# * Closing connection #0
+# }
+
+
+# [root@ip-10-36-19-68 ~]# curl -uadmin:admin http://localhost:8080/api/v1/hosts
+# {
+#   "href" : "http://localhost:8080/api/v1/hosts",
+#   "items" : [
+#     {
+#       "href" : "http://localhost:8080/api/v1/hosts/ip-10-36-19-68.us-west-2.compute.internal",
+#       "Hosts" : {
+#         "host_name" : "ip-10-36-19-68.us-west-2.compute.internal"
+#       }
+#     }
+#   ]
 # }
