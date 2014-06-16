@@ -207,10 +207,10 @@ sudo /etc/init.d/iptables stop
 sudo chkconfig ip6tables off
 sudo /etc/init.d/ip6tables stop
 
-sudo yum update openssl.x86_64
+sudo yum update openssl.x86_64 -y
 
 echo "The version of openssl.x86_64:"
-yum list  installed openssl.x86_64 | tail -n 1 | awk '{print $2}'
+yum list installed openssl.x86_64 | tail -n 1 | awk '{print $2}'
 
 echo "openssl:"
 echo "Good Version: 1.0.1e-16.el6_5.14 - (Known to work)"
@@ -245,7 +245,7 @@ echo "FQDN:$my_fqdn"
 
 ping -c 1 $my_fqdn
 
-if [ !  $? -eq 0 ] ; then
+if [ ! $? -eq 0 ] ; then
 my_fqdn=$(hostname)
 
 # get the main ip address
