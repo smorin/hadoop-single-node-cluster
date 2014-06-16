@@ -60,7 +60,7 @@ fi
 
 
 
-if [ $UID -ne 0] ; then
+if [ $UID -ne 0 ] ; then
     echo "WARNING NOT BEING RUN AS ROOT"
     echo ""
     echo "RECOMMENDED: Run only as root, only tested that way."
