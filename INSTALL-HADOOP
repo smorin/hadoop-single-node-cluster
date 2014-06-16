@@ -58,12 +58,30 @@ else
     fi
 fi
 
+
+
+if [ $UID -ne 0] ; then
+    echo "WARNING NOT BEING RUN AS ROOT"
+    echo ""
+    echo "RECOMMENDED: Run only as root, only tested that way."
+    echo ""
+    if [ "$FORCE" == "false" ] ; then
+        echo "Use: argument -f to force"
+        exit 1;
+    fi
+fi
+
+
 if [ -f /etc/redhat-release ] ; then
     echo "Using OS:"
     cat /etc/redhat-release
 else
     echo "WARNING this is only tested on CENTOS this may not work"
     printf "\n\n"
+    if [ "$FORCE" == "false" ] ; then
+        echo "Use: argument -f to force"
+        exit 1;
+    fi
 fi
 
 
