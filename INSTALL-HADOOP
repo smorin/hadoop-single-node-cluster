@@ -92,17 +92,47 @@ function check_http_status(){
         fi
 }
 
+function check_ambari() {
+    local ambari_status=0
+    local ps_ran=1
+    if [ -f /var/run/ambari-server/ambari-server.pid ] ; then
+        ps -p `cat /var/run/ambari-server/ambari-server.pid` &> /dev/null
+    else
+        ps_ran=0
+    fi
+
+    if [ $? -ne 0 ] || [ $ps_ran -eq 0 ]  ; then
+        # Count 1 is not found
+        # Count 2 is the search and process found
+        PROCESS_CHECK=$(ps aux | grep org.apache.ambari.server.controller.AmbariServer | wc -l)
+        if [ $PROCESS_CHECK -lt 2 ] ; then
+            # Ambari's not running
+            ambari_status=1
+        fi
+    fi
+    return $ambari_status
+}
+
 
 function wait_until_some_http_status () {
     local url=$1
     local target_status=$2
+    local check_ambari_running=$3
     local s=0
     local spinstr='|/-\'
     local clean_spin=0
+    local seconds_past=0
 
 
     while [[ $s != $target_status ]]
         do
+            if [ "x$check_ambari_running" == "xtrue" ] ; then
+                check_ambari
+                if [ $? -ne 0 ] ; then
+                    echo "Ambari stopped running ending the loop"
+                    exit 1
+                fi
+            fi
             s=$(curl -o /dev/null -s -w %{http_code} $url)
             if [[ $s == "000" ]]
                 then
@@ -121,6 +151,13 @@ function wait_until_some_http_status () {
                     echo "HTTP status: $s"
             fi
             sleep 2
+            let "seconds_past=$seconds_past+2"
+            
+            if [ $seconds_past -gt 120 ] ; then
+                echo "waiting for ambari more than 2 minutes"
+                echo "exiting now"
+                exit 1
+            fi
 
         done
 }
@@ -210,7 +247,7 @@ echo "Add the blueprint.json blueprint file to our Ambari server's available blu
 curl -v -X POST -d @$TMP_DIR/blueprint.json http://admin:admin@localhost:8080/api/v1/blueprints/bp-all-services --header "Content-Type:application/json" --header "X-Requested-By:mycompany"
 
 echo "Trying http://localhost:8080/api/v1/clusters to confirm Ambari server is still up..."
-wait_until_some_http_status "http://admin:admin@localhost:8080/api/v1/clusters" "200"
+wait_until_some_http_status "http://admin:admin@localhost:8080/api/v1/clusters" "200" "true"
 
 echo "Replace the dummy hostname in the cluster creation JSON file with this host's fully qualified domain name"
 # now set above
