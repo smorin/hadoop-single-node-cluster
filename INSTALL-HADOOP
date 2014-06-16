@@ -201,6 +201,12 @@ echo "First install and start needed services"
 sudo yum install -y ntp ntpdate ntp-doc  # in many installs, ex. RHEL EC2 AMI, we already have ntpd and ntpupdate installed
 sudo chkconfig ntpd on
 sudo service ntpd restart
+
+sudo chkconfig iptables off
+sudo /etc/init.d/iptables stop
+sudo chkconfig ip6tables off
+sudo /etc/init.d/ip6tables stop
+
 echo "To get ambari with yum we need the Hortonworks repo"
 
 # Old code using wget - replaced with the curl equivalent
