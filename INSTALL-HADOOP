@@ -96,13 +96,13 @@ if [[ $email_contact == "" ]] ; then
 fi
 
 
-
 function check_http_status(){
     url=$1
     target_status=$2
     local retstatus=0
     actual_status=$(curl -o /dev/null -s -w %{http_code} $url)
-    if [[ $target_status == actual_status ]]; then
+    
+    if [[ $target_status == $actual_status ]]; then
             #echo "Target status matched."
             retstatus=0
     else
@@ -303,7 +303,7 @@ fi
 #     curl -H "X-Requested-By: ambari" -u admin:admin -i -X DELETE http://localhost:8080/api/v1/clusters/cl1
 # fi
 
-check_http_status  '-H "X-Requested-By: ambari" -u admin:admin -i  http://localhost:8080/api/v1/clusters/cl1' 200
+check_http_status  ' -u admin:admin -i  http://localhost:8080/api/v1/clusters/cl1' 200
 
 if [ $? -eq 0 ] ; then
     # curl -o /dev/null -s -w %{http_code} 
