@@ -8,6 +8,8 @@ This will install a single node hadoop cluster on a machine with single command.
 ## Help WANTED
 - Looking for help adding Ubuntu Support
 
+
+
 ## Installation
 
 
@@ -16,6 +18,28 @@ This will install a single node hadoop cluster on a machine with single command.
   curl -sSL https://raw.githubusercontent.com/DemandCube/hadoop-single-node-cluster/master/INSTALL-HADOOP | bash -s -- -r
 ```
 NOTE: Meant to be run as root
+
+
+# Services
+- HDFS
+- Yarn
+- MapReduce2
+- Storm
+- Hive
+- Tez
+- Oozie
+- Ambari
+- Pig
+- HCat
+- WebHCat
+- Zookeeper
+- Nagios
+- Ganglia
+- Sqoop
+- Falcon
+
+
+
 
 # Compatibility
 
