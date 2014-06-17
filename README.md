@@ -5,7 +5,8 @@ This will install a single node hadoop cluster on a machine with single command.
 
 - This is part of [NeverwinterDP the Data Pipeline for Hadoop](https://github.com/DemandCube/NeverwinterDP)
 
-
+## Help WANTED
+- Looking for help adding Ubuntu Support
 
 ## Installation
 
