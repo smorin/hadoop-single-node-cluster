@@ -12,8 +12,8 @@ This will install a single node hadoop cluster on a machine with single command.
 
 ## Installation
 - Two Methods
-  # Remote - One liner from Github
-  # Local - From local copy of the repo
+   - Remote - One liner from Github
+   - Local - From local copy of the repo
 
 # Remote - One liner  
 ```
