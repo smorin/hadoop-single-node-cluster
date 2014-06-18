@@ -88,7 +88,7 @@ fi
 # email_contact=$1 # nagios wants the sysadmin's email address
 if [[ $email_contact == "" ]] ; then
     echo "Usage: create_cluster.sh [someone@example.com]"
-    echo "Optionally supply a contact email for Nagios monitoring. Exiting."
+    echo "Optionally supply a contact email for Nagios monitoring."
 
     email_contact='nobody@noop.com'
     echo "Using default email for nagios: ${email_contact}"
@@ -101,7 +101,7 @@ function check_http_status(){
     target_status=$2
     local retstatus=0
     actual_status=$(curl -o /dev/null -s -w %{http_code} $url)
-    
+
     if [[ $target_status == $actual_status ]]; then
             #echo "Target status matched."
             retstatus=0
@@ -156,7 +156,7 @@ function wait_until_some_http_status () {
             s=$(curl -o /dev/null -s -w %{http_code} $url)
             if [[ $s == "000" ]]
                 then
-                    if [ ${REMOTE:-false} == "false" ] ; then  
+                    if [ ${REMOTE:-false} == "false" ] ; then
                         if [ $clean_spin -eq 1 ] ; then
                             printf "\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b"
                         fi
@@ -164,7 +164,7 @@ function wait_until_some_http_status () {
                         printf "no response from server - [%c]  " "$spinstr"
                         local spinstr=$temp${spinstr%"$temp"}
                         clean_spin=1
-                    else 
+                    else
                         echo "<no response from server>"
                     fi
                 else
@@ -172,7 +172,7 @@ function wait_until_some_http_status () {
             fi
             sleep 2
             let "seconds_past=$seconds_past+2"
-            
+
             if [ $seconds_past -gt 120 ] ; then
                 echo "waiting for ambari more than 2 minutes"
                 echo "exiting now"
@@ -274,7 +274,7 @@ echo "Replace the dummy email address in the blueprint JSON file with the specif
 if [ "$REMOTE" == "true" ] ; then
     curl -s https://raw.githubusercontent.com/DemandCube/hadoop-single-node-cluster/master/blueprint-raw.json | sed s/NAGIOS_CONTACT_GOES_HERE/$email_contact/ > $TMP_DIR/blueprint.json
 else
-    sed s/NAGIOS_CONTACT_GOES_HERE/$email_contact/ blueprint-raw.json > $TMP_DIR/blueprint.json    
+    sed s/NAGIOS_CONTACT_GOES_HERE/$email_contact/ blueprint-raw.json > $TMP_DIR/blueprint.json
 fi
 
 
@@ -319,7 +319,7 @@ fi
 check_http_status  ' -u admin:admin -i  http://localhost:8080/api/v1/clusters/cl1' 200
 
 if [ $? -eq 0 ] ; then
-    # curl -o /dev/null -s -w %{http_code} 
+    # curl -o /dev/null -s -w %{http_code}
     echo "Cluster [cl1] already exists - deleting it"
     curl -H "X-Requested-By: ambari" -u admin:admin -i -X DELETE http://localhost:8080/api/v1/clusters/cl1
 fi
@@ -361,29 +361,29 @@ LOOP_SECONDS=0
 AMBARI_RESTARTS=0
 
 while [[ "$CHECK_STATUS" == "true" ]] ; do
-    
+
     CMD_CLUSTER_STATUS='curl -uadmin:admin -o /dev/null -s -w %{http_code} http://localhost:8080/api/v1/clusters/cl1/requests/1?fields=Requests/request_status'
     CMD_CLUSTER_RESULTS='curl -s -uadmin:admin http://localhost:8080/api/v1/clusters/cl1/requests/1?fields=Requests/request_status'
     CMD_CLUSTER_RESULTS_SECTION='curl -s -uadmin:admin http://localhost:8080/api/v1/clusters/cl1/requests/1?fields=Requests'
-    
+
     CLUSTER_STATUS=`$CMD_CLUSTER_STATUS`
     CLUSTER_RESULTS=`$CMD_CLUSTER_RESULTS`
     CLUSTER_RESULTS_STATUS=`echo "$CLUSTER_RESULTS" | grep request_status | awk '{print $3}' | tr -d [\"]`
-    
+
     CLUSTER_RESULTS_SECTION=`$CMD_CLUSTER_RESULTS_SECTION`
-    
+
     CLUSTER_RESULTS_COMPLETED=`echo "$CLUSTER_RESULTS_SECTION" | grep completed_task_count | awk '{print $3}' | tr -d [\",]`
     CLUSTER_RESULTS_TASKS=`echo "$CLUSTER_RESULTS_SECTION" | grep \"task_count | awk '{print $3}' | tr -d [\",]`
     # echo "$CLUSTER_STATUS"
     # echo "$CLUSTER_RESULTS_STATUS"
-    
+
     # Test if ambari server dies
     # /var/run/ambari-server/ambari-server.pid
-    
+
     echo "Total Tasks:$CLUSTER_RESULTS_TASKS Tasks Completed:$CLUSTER_RESULTS_COMPLETED"
-    
+
     ps -p `cat /var/run/ambari-server/ambari-server.pid` > /dev/null
-    
+
     if [ $? -ne 0 ] ; then
         echo "Problem finding ambari running with pid file."
         if [ -f /var/run/ambari-server/ambari-server.pid ] ; then
@@ -405,14 +405,14 @@ while [[ "$CHECK_STATUS" == "true" ]] ; do
             fi
         fi
     fi
-    
-    
+
+
     # if pid missing or check with checking for process
     # /usr/jdk64/jdk1.7.0_45/bin/java -server -XX:NewRatio=3 -XX:+UseConcMarkSweepGC -XX:-UseGCOverheadLimit -XX:CMSInitiatingOccupancyFraction=60 -Xms512m -Xmx2048m -Djava.security.auth.login.config=/etc/ambari-server/conf/krb5JAASLogin.conf -Djava.security.krb5.conf=/etc/krb5.conf -Djavax.security.auth.useSubjectCredsOnly=false -cp /etc/ambari-server/conf:/usr/lib/ambari-server/*:/usr/lib64/qt-3.3/bin:/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin:/root/bin:/usr/lib/ambari-server/*:/usr/share/java/mysql-connector-java.jar:/usr/share/java/mysql-connector-java-5.1.17.jar org.apache.ambari.server.controller.AmbariServer
-    
-    
+
+
 if [[ "$CLUSTER_STATUS" == "000" ]] ; then
-        if [ ${REMOTE:-false} == "false" ] ; then  
+        if [ ${REMOTE:-false} == "false" ] ; then
             if [ $clean_spin -eq 1 ] ; then
                 printf "\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b"
             fi
@@ -420,13 +420,13 @@ if [[ "$CLUSTER_STATUS" == "000" ]] ; then
             printf "no response from server - [%c]  " "$spinstr"
             local spinstr=$temp${spinstr%"$temp"}
             clean_spin=1
-        else 
+        else
             echo "<no response from server, continue to poll> (seconds: $LOOP_SECONDS)"
         fi
 elif [ "$CLUSTER_STATUS" == "200" ] ; then
     # Success and test for CLUSTER_RESULTS_STATUS (IN_PROGRESS,FAILED,COMPLETED)
     echo "Successful call (seconds: $LOOP_SECONDS) - current status:$CLUSTER_RESULTS_STATUS"
-    
+
     if [ "$CLUSTER_RESULTS_STATUS" == "COMPLETED" ] || [ "$CLUSTER_RESULTS_STATUS" == "FAILED" ] ; then
         if [ "$CLUSTER_RESULTS_STATUS" == "COMPLETED" ] ; then
             echo "Done - Enjoy your cluster - NeverwinterDP Team - http://www.neverwinterdp.com"
@@ -437,7 +437,7 @@ elif [ "$CLUSTER_STATUS" == "200" ] ; then
             exit 1
         fi
     fi
-    
+
 elif [ "$CLUSTER_STATUS" == "403" ] ; then
     # Check error message
     MSG="\nGot a 403 response so is probably a authentication problem.\n\n"
@@ -452,19 +452,19 @@ elif [ "$CLUSTER_STATUS" == "404" ] ; then
 elif [ "${CLUSTER_STATUS:0:1}" == "2" ] ; then
     MSG="\nGot a 2XX response so should be good.\n\n"
     printf "$MSG"
-    
+
     echo "$CLUSTER_RESULTS"
-    
+
     printf "$MSG"
     echo "Ending Loop"
     exit 1
-    
+
 elif [ "${CLUSTER_STATUS:0:1}" == "4" ] ; then
     MSG="\nGot a 4XX response so there is probably a problem.\n\n"
     printf "$MSG"
-    
+
     echo "$CLUSTER_RESULTS"
-    
+
     printf "$MSG"
     exit 1
 else
@@ -563,14 +563,14 @@ done
 # > Content-Type:application/json
 # > X-Requested-By:mycompany
 # > Content-Length: 251
-# > 
+# >
 # < HTTP/1.1 400 Bad Request
 # < Set-Cookie: AMBARISESSIONID=1loev1y9bqi551lcirxdyqs21q;Path=/
 # < Expires: Thu, 01 Jan 1970 00:00:00 GMT
 # < Content-Type: text/plain
 # < Content-Length: 178
 # < Server: Jetty(7.6.7.v20120910)
-# < 
+# <
 # {
 #   "status" : 400,
 #   "message" : "Attempted to add unknown hosts to a cluster.  These hosts have not been registered with the server: ip-10-36-3-46.us-west-2.compute.internal"
