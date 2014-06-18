@@ -58,7 +58,7 @@ ENVIRONMENTS (Been tested on)
 
 
 * * *
-## multiinit
+## INSTALL-HADOOP
 ```
 Usage: INSTALL-HADOOP [-rf]
 This will
