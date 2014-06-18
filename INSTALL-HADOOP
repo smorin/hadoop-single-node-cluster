@@ -46,8 +46,7 @@ else
     # test if machine has 4 gigs
     if [ $ram -lt 4194304 ] ; then
         echo "WARNING NOT ENOUGH MEMORY"
-        echo "RAM=$ram kilobytes"
-        echo "NOTE: 1 gig of ram is 1048576 kilobytes"
+        echo "You have $(free -lg | head -n 2 | tail -n 1 | awk '{print $2}') gig of RAM"
         echo ""
         echo "RECOMMENDED: Minimum of 4 Gigs of RAM or will probably fail"
         echo ""
