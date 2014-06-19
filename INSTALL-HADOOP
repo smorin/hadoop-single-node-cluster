@@ -348,8 +348,7 @@ fi
 echo "Now cause a cluster to be created with our loaded blueprint"
 curl -v -X POST -d @$TMP_DIR/cluster-creation.json http://admin:admin@localhost:8080/api/v1/clusters/cl1 --header "Content-Type:application/json" --header "X-Requested-By:mycompany"
 echo ""
-echo "Single node Ambari setup finished. Point browser to localhost:8080 and log in as admin:admin to use Ambari."
-
+echo "Cluster creation should now be in process. This script will now monitor it until completion. You can also point your browser to localhost:8080 and log in as admin:admin to monitor it yourself."
 # This gets COMPLETED when done
 # curl -s -uadmin:admin http://localhost:8080/api/v1/clusters/cl1/requests/1?fields=Requests/request_status | grep request_status | awk '{print $3}' | tr -d [\"]
 
@@ -428,11 +427,11 @@ elif [ "$CLUSTER_STATUS" == "200" ] ; then
     
     if [ "$CLUSTER_RESULTS_STATUS" == "COMPLETED" ] || [ "$CLUSTER_RESULTS_STATUS" == "FAILED" ] ; then
         if [ "$CLUSTER_RESULTS_STATUS" == "COMPLETED" ] ; then
-            echo "Done - Enjoy your cluster - NeverwinterDP Team - http://www.neverwinterdp.com"
+            echo "Done - Point browser to localhost:8080 and log in as admin:admin to use Ambari - Enjoy your cluster - NeverwinterDP Team - http://www.neverwinterdp.com"
             exit 0
         fi
         if [ "$CLUSTER_RESULTS_STATUS" == "FAILED" ] ; then
-            echo "It failed you'll need to investigate"
+            echo "It failed you'll need to investigate. Point browser to localhost:8080 and log in as admin:admin."
             exit 1
         fi
     fi
