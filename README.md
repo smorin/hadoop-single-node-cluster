@@ -5,9 +5,12 @@ This will install a single node hadoop cluster on a machine with single command.
 
 - This is part of [NeverwinterDP the Data Pipeline for Hadoop](https://github.com/DemandCube/NeverwinterDP)
 
-## Help WANTED
-- Looking for help adding Ubuntu Support
-
+## Help WANTED - Looking for help with
+- [Support Arguments to list and configure which services to install #9](https://github.com/DemandCube/hadoop-single-node-cluster/issues/9)
+- [Support for help functionality and also delete services #17](https://github.com/DemandCube/hadoop-single-node-cluster/issues/17)
+- [Add command line args change which blueprint template to use #22](https://github.com/DemandCube/hadoop-single-node-cluster/issues/22)
+- [Add command line argument to config params to the blueprint #23](https://github.com/DemandCube/hadoop-single-node-cluster/issues/23)
+- [Add ubuntu support #24](https://github.com/DemandCube/hadoop-single-node-cluster/issues/24)
 
 
 ## Installation
