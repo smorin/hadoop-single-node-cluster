@@ -11,6 +11,8 @@ This will install a single node hadoop cluster on a machine with single command.
 - [Add command line args change which blueprint template to use #22](https://github.com/DemandCube/hadoop-single-node-cluster/issues/22)
 - [Add command line argument to config params to the blueprint #23](https://github.com/DemandCube/hadoop-single-node-cluster/issues/23)
 - [Add ubuntu support #24](https://github.com/DemandCube/hadoop-single-node-cluster/issues/24)
+- [Document minimum set of services needed to test a Yarn application #25](https://github.com/DemandCube/hadoop-single-node-cluster/issues/25)
+- [Document minimum set of configs changes need for Yarn dev setup to reduce container size #26](https://github.com/DemandCube/hadoop-single-node-cluster/issues/26)
 
 
 ## Installation
