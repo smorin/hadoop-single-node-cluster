@@ -73,9 +73,9 @@ OS
 Should be good on RED-HAT Family of Distros
 ```
 ENVIRONMENTS (Been tested on)
-- vagrant (centos 6.5 x86_64)
-- ec2 (centos 6.5 x86_64)
-- digitalocean (centos 6.5 x86_64)
+- vagrant (centos 6.4,6.5 x86_64)
+- ec2 (centos 6.4,6.5 x86_64)
+- digitalocean (centos 6.4,6.5 x86_64)
 
 # Usage
 
