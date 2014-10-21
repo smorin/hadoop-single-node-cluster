@@ -13,6 +13,8 @@ This will install a single node hadoop cluster on a machine with single command.
 - [Add ubuntu support #24](https://github.com/DemandCube/hadoop-single-node-cluster/issues/24)
 - [Document minimum set of services needed to test a Yarn application #25](https://github.com/DemandCube/hadoop-single-node-cluster/issues/25)
 - [Document minimum set of configs changes need for Yarn dev setup to reduce container size #26](https://github.com/DemandCube/hadoop-single-node-cluster/issues/26)
+- [Test minimal config for Yarn and if works add commandline arg #28](https://github.com/DemandCube/hadoop-single-node-cluster/issues/28)
+- [Make all warnings print before exiting #27](https://github.com/DemandCube/hadoop-single-node-cluster/issues/27)
 
 
 ## Installation
