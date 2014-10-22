@@ -31,10 +31,23 @@ This will install a single node hadoop cluster on a machine with single command.
 ```
 git clone https://github.com/DemandCube/hadoop-single-node-cluster.git
 cd hadoop-single-node-cluster
-./INSTALL-HADOOP
+sudo ./INSTALL-HADOOP
 ```
-NOTE: Meant to be run as root
+NOTE: Meant to be run as root/super user
 
+#Minimal Installation (Installs just HDFS, YARN, Zookeeper, MapReduce2, and Tez)
+```
+git clone https://github.com/DemandCube/hadoop-single-node-cluster.git
+cd hadoop-single-node-cluster
+sudo ./INSTALL-HADOOP -y
+```
+
+#To specify your own custom blueprint file (Not recommended)
+```
+git clone https://github.com/DemandCube/hadoop-single-node-cluster.git
+cd hadoop-single-node-cluster
+sudo ./INSTALL-HADOOP -b my-custom-blueprint.json
+```
 
 # Services with their components.
 
@@ -83,11 +96,13 @@ ENVIRONMENTS (Been tested on)
 * * *
 ## INSTALL-HADOOP
 ```
-Usage: INSTALL-HADOOP [-rf]
+Usage: INSTALL-HADOOP [-rfyb]
 This will
-
-    -r,                              (Optional) REMOTE - Pulls all templates as remote 
-    -f,                              (Optional) FORCE  - Forces in install if less them 4 gigs of ram
+    
+    -y,                              (Optional) MINIMAL   - Installs a minimal installation - just HDFS, Yarn, MapReduce, Tez, and Zookeeper
+    -b [blueprint file],             (Optional) BLUEPRINT - Specify your own custom blueprint file
+    -r,                              (Optional) REMOTE    - Pulls all templates as remote 
+    -f,                              (Optional) FORCE     - Forces in install if less them 4 gigs of ram
 ```
 
 * * *
