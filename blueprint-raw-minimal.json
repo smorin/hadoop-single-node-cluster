@@ -1,0 +1,65 @@
+'{
+  "configurations" : [
+    {
+      "global" : {
+        "nagios_contact": "NAGIOS_CONTACT_GOES_HERE"
+      }
+    }
+  ],
+
+  "host_groups" : [
+    {
+    "name" : "host_group_1",
+    "components" : [
+    {
+    "name" : "HISTORYSERVER"
+    },
+    {
+    "name" : "NAMENODE"
+    },
+    {
+    "name" : "AMBARI_SERVER"
+    },
+    {
+    "name" : "APP_TIMELINE_SERVER"
+    },
+    {
+    "name" : "HDFS_CLIENT"
+    },
+    {
+    "name" : "NODEMANAGER"
+    },
+    {
+    "name" : "DATANODE"
+    },
+    {
+    "name" : "RESOURCEMANAGER"
+    },
+    {
+    "name" : "ZOOKEEPER_SERVER"
+    },
+    {
+    "name" : "ZOOKEEPER_CLIENT"
+    },
+    {
+    "name" : "SECONDARY_NAMENODE"
+    },
+    {
+    "name" : "TEZ_CLIENT"
+    },
+    {
+    "name" : "YARN_CLIENT"
+    },
+    {
+    "name" : "MAPREDUCE2_CLIENT"
+    }
+    ],
+    "cardinality" : "1"
+    }
+  ],
+  "Blueprints" : {
+    "blueprint_name" : "bp-all-services",
+    "stack_name" : "HDP",
+    "stack_version" : "2.1"
+  }
+}'
