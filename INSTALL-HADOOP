@@ -9,7 +9,9 @@
 FORCE=false
 DEBUG=false
 REMOTE=false
-while getopts ":e:fdr" Option
+BLUEPRINT="blueprint-raw-all.json"
+YARN=false
+while getopts ":b:e:fdry" Option
 # Initial declaration.
 # a, b, c, d, e, f, and g are the flags expected.
 # The : after flag 'e' shows it will have an option passed with it.
@@ -17,14 +19,16 @@ do
   case $Option in
 #	w ) CMD=$OPTARG; FILENAME="PIMSLogList.txt"; TARGET="logfiles"; ;;
     e ) email_contact=$OPTARG ;;
+    y ) BLUEPRINT="blueprint-raw-minimal.json" ;;
+    b ) BLUEPRINT=$OPTARG ;;
 	f ) FORCE=true ;;
 	d ) DEBUG=true ;;
     r ) REMOTE=true ;;
 	* ) echo "Not recognized argument"; exit -1  ;;
+    
   esac
 done
 shift $(($OPTIND - 1))
-
 
 if [ -f HADOOP-SINGLE-NODE-CLUSTER ] ; then
     cat HADOOP-SINGLE-NODE-CLUSTER
@@ -271,9 +275,9 @@ TMP_DIR=/tmp
 echo "Replace the dummy email address in the blueprint JSON file with the specified email address"
 
 if [ "$REMOTE" == "true" ] ; then
-    curl -s https://raw.githubusercontent.com/DemandCube/hadoop-single-node-cluster/master/blueprint-raw.json | sed s/NAGIOS_CONTACT_GOES_HERE/$email_contact/ > $TMP_DIR/blueprint.json
+    curl -s https://raw.githubusercontent.com/DemandCube/hadoop-single-node-cluster/master/$BLUEPRINT | sed s/NAGIOS_CONTACT_GOES_HERE/$email_contact/ > $TMP_DIR/blueprint.json
 else
-    sed s/NAGIOS_CONTACT_GOES_HERE/$email_contact/ blueprint-raw.json > $TMP_DIR/blueprint.json    
+    sed s/NAGIOS_CONTACT_GOES_HERE/$email_contact/ $BLUEPRINT > $TMP_DIR/blueprint.json    
 fi
 
 
